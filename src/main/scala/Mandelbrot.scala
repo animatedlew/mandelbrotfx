@@ -7,6 +7,7 @@ import scalafx.scene.canvas.Canvas
 import scalafx.scene.image.PixelWriter
 import scalafx.scene.input.KeyEvent
 import scalafx.scene.paint.{Stop, CycleMethod, LinearGradient, Color}
+import scalafx.scene.text.Text
 import scalafx.stage.StageStyle
 import scalafx.animation.AnimationTimer
 import scala.util.control.Breaks._
@@ -38,20 +39,29 @@ object Mandelbrot extends JFXApp {
         cycleMethod = CycleMethod.NO_CYCLE,
         stops = List(Stop(0.0, Color.BLACK), Stop(1.0, Color.GRAY))
       )
+      val fpsLabel = new Text {
+        text = "0 fps"
+        translateX = 10
+        translateY = 20
+        fill = Color.WHITE
+      }
       val canvas = new Canvas(w, h)
       val gc = canvas.graphicsContext2D
       val group = new Group {
         focusTraversable = true
         onKeyPressed = (ke: KeyEvent) => println(ke.code)
         onKeyReleased = (ke: KeyEvent) => println(ke.code)
-        children = canvas
+        children = List(canvas, fpsLabel)
       }
       val writer = gc.getPixelWriter
       var lastTime = 0L
       var delta = 0D
+      var fps = "0 fps"
       AnimationTimer { ns =>
         if (lastTime > 0) {
           delta = (ns - lastTime) / 1e9
+          fps = s"${Math.round(1/delta)} fps"
+          fpsLabel.text = fps
           (0 until h).foreach { y =>
             val cI = maxI - y * factorI
             (0 until w).foreach { x =>
